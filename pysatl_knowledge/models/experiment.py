@@ -7,7 +7,7 @@ from pysatl_knowledge.models.base import Base
 class Experiment(Base):
     """ORM model for experiments in the knowledge base."""
 
-    __tablename__ = 'experiments'
+    __tablename__ = "experiments"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     criterion_code: Mapped[str]

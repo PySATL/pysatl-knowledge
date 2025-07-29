@@ -1,13 +1,13 @@
-from typing import List
-
 from sqlalchemy.future import select
 
-from pysatl_knowledge.models import Experiment
 from pysatl_knowledge.core.database import async_session
+from pysatl_knowledge.models import Experiment
 
 
 class ExperimentRepository:
-    async def find_by_params(self, criterion_code: str, sample_size: int, iterations: int) -> List[Experiment]:
+    async def find_by_params(
+        self, criterion_code: str, sample_size: int, iterations: int
+    ) -> list[Experiment]:
         """
         Find experiments by criterion code, sample size, and iterations.
         :param criterion_code: The code of the criterion to filter experiments.
@@ -25,19 +25,19 @@ class ExperimentRepository:
             )
             return result.scalars().all()
 
-    async def find_by_id(self, id: int) -> Experiment | None:
+    async def find_by_id(self, cv_id: int) -> Experiment | None:
         """
         Find an experiment by its ID.
         :param id: The ID of the experiment to find.
         :return: An Experiment object if found, otherwise None.
         """
         async with async_session() as session:
-            result = await session.execute(
-                select(Experiment).where(Experiment.id == id)
-            )
+            result = await session.execute(select(Experiment).where(Experiment.id == cv_id))
             return result.scalar_one_or_none()
 
-    async def get_status(self, criterion_code: str, sample_size: int, iterations: int) -> str | None:
+    async def get_status(
+        self, criterion_code: str, sample_size: int, iterations: int
+    ) -> str | None:
         """
         Get the status of an experiment based on its criterion code, sample size, and iterations.
         :param criterion_code: The code of the criterion to filter experiments.

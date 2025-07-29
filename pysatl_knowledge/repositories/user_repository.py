@@ -1,7 +1,8 @@
 from sqlalchemy.future import select
 
-from pysatl_knowledge.models import User
 from pysatl_knowledge.core.database import async_session
+from pysatl_knowledge.models import User
+
 
 class UserRepository:
     async def find_by_username(self, username: str) -> User | None:
@@ -11,9 +12,7 @@ class UserRepository:
         :return: A User object if found, otherwise None.
         """
         async with async_session() as session:
-            result = await session.execute(
-                select(User).where(User.username == username)
-            )
+            result = await session.execute(select(User).where(User.username == username))
             return result.scalar_one_or_none()
 
     async def create(self, user: User) -> User:

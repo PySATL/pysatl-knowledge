@@ -7,7 +7,7 @@ authors = [
 ]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "fastapi>=0.111.0",
     "uvicorn[standard]>=0.30.0",
@@ -63,6 +63,9 @@ skip_glob = ["**/.env*", "**/env/*", "**/.venv/*", "**/docs/*", "**/user_data/*"
 [tool.ruff]
 line-length = 100
 extend-exclude = [".env", ".venv"]
+exclude = [
+    "migrations/versions",
+]
 
 [tool.ruff.lint]
 extend-select = [
