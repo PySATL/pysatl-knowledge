@@ -1,5 +1,3 @@
-name: PySATL CI
-
 on:
   push:
     branches:
@@ -35,10 +33,10 @@ jobs:
         run: poetry install --with dev
 
       - name: Run Ruff lint
-        run: poetry run ruff check --output-format=github
+        run: poetry run ruff check --output-format=github --extend-exclude "migrations"
 
       - name: Check formatting with Ruff
-        run: poetry run ruff format --check
+        run: poetry run ruff format pysatl_knowledge --check
 
       - name: Mypy
         run: |

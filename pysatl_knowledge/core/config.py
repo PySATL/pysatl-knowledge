@@ -1,12 +1,20 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    DB_HOST: str
-    DB_PORT: int
-    DB_NAME: str
-    DB_USER: str
-    DB_PASS: str
+    app_name: str = "test"
+    secret_key: str = "supersecretkey"
+    access_token_expire_minutes: int = 30
+    log_level: str = "INFO"
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 5432
+    DB_NAME: str = "test"
+    DB_USER: str = "test"
+    DB_PASS: str = "<PASSWORD>"
+
+    class Config:
+        env_file = ".env"
+        extra = "ignore"
 
     @property
     def DATABASE_URL(self) -> str:
@@ -18,8 +26,6 @@ class Settings(BaseSettings):
             f"{self.DB_PORT}/"
             f"{self.DB_NAME}"
         )
-
-    model_config = SettingsConfigDict(env_file=".env")
 
 
 settings = Settings()
