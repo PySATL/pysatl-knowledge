@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from pysatl_knowledge.models.base import Base
 
 
-class Experiment(Base):
+class CriticalValueModel(Base):
     """ORM model for experiments in the knowledge base."""
 
     __tablename__ = "experiments"

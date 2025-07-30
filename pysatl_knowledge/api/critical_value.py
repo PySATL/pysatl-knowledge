@@ -1,13 +1,14 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path
 
-from pysatl_knowledge.core.security import get_current_admin, get_current_user
-from pysatl_knowledge.schemas.critical_value import (
+from pysatl_knowledge.core.security.jwt_utils import get_current_admin, get_current_user
+from pysatl_knowledge.schemas.critical_value_schema import (
     CriticalValueCreate,
     CriticalValueResponse,
     CriticalValueVerify,
 )
+from pysatl_knowledge.services.critical_value_service import CriticalValuesService
 from pysatl_knowledge.services.dependencies import get_cv_service
 
 
@@ -16,28 +17,47 @@ router = APIRouter(prefix="/critical_values", tags=["Critical Values"])
 
 @router.get("", response_model=CriticalValueResponse)
 async def get_critical_values(
-    code: Optional[str] = Query(None),
-    size: Optional[int] = Query(None),
-    sl: Optional[float] = Query(None),
+    criterion_code: str,
+    size: int,
+    iterations: int,
+    service: CriticalValuesService = Depends(get_cv_service),
+):
+    return (
+        await service.get_cv_by_params(
+            criterion_code=criterion_code,
+            sample_size=size,
+            iterations=iterations,
+            status="verified",
+        )
+    )[0]
+
+
+@router.get("/all", response_model=list[CriticalValueResponse])
+async def get_all_critical_values(
+    criterion_code: Optional[str] = None,
+    size: Optional[int] = None,
+    iterations: Optional[int] = None,
+    status: Optional[str] = None,
+    current_user=Depends(get_current_user),
     service: CriticalValueCreate = Depends(get_cv_service),
 ):
-    """
-    Получить список критических значений с фильтрацией по code/size/sl.
-    """
-    return await service.get_cv_by_params(code=code, size=size, sl=sl)
+    return await service.get_cv_by_params(
+        criterion_code=criterion_code,
+        sample_size=size,
+        iterations=iterations,
+        status=status,
+    )
 
 
 @router.post("", response_model=CriticalValueResponse)
 async def create_critical_value(
-    data: CriticalValueCreate,
-    service: CriticalValueCreate = Depends(get_cv_service),
-    current_user=Depends(get_current_user),
+    data: CriticalValueCreate, service: CriticalValuesService = Depends(get_cv_service)
 ):
     """
     Создать новое критическое значение.
     """
     try:
-        return await service.create_cv(data, created_by=current_user.id)
+        return await service.create_cv(data)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -46,7 +66,7 @@ async def create_critical_value(
 async def verify_critical_value(
     data: CriticalValueVerify,
     critical_value_id: int = Path(..., ge=1),
-    service: CriticalValueCreate = Depends(get_cv_service),
+    service: CriticalValuesService = Depends(get_cv_service),
     current_admin=Depends(get_current_admin),
 ):
     """

@@ -1,4 +1,3 @@
-# app/core/security.py
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -7,7 +6,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from pysatl_knowledge.core.config import settings
-from pysatl_knowledge.core.moke_db import MOCK_USERS
+from pysatl_knowledge.models import User
+from pysatl_knowledge.repositories import UserRepository
 
 
 SECRET_KEY = settings.secret_key
@@ -25,7 +25,14 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_user_repository() -> UserRepository:
+    return UserRepository()
+
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    user_repo: UserRepository = Depends(get_user_repository),
+) -> User:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -34,13 +41,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except jwt.PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-    user = MOCK_USERS.get(username)
+    user = await user_repo.find_by_username(username)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+
     return user
 
 
-async def get_current_admin(user: dict = Depends(get_current_user)):
-    if user["role"] != "admin":
+async def get_current_admin(user: User = Depends(get_current_user)):
+    if user.role != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough privileges")
     return user

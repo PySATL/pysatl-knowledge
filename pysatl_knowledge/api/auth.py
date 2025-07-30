@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
-from pysatl_knowledge.schemas.auth import LoginResponse
+from pysatl_knowledge.schemas.auth_schema import LoginResponse
 from pysatl_knowledge.services.auth_service import AuthService
 from pysatl_knowledge.services.dependencies import get_auth_service
 

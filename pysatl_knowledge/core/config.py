@@ -6,11 +6,11 @@ class Settings(BaseSettings):
     secret_key: str = "supersecretkey"
     access_token_expire_minutes: int = 30
     log_level: str = "INFO"
-    DB_HOST: str
-    DB_PORT: int
-    DB_NAME: str
-    DB_USER: str
-    DB_PASS: str
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 5432
+    DB_NAME: str = "test"
+    DB_USER: str = "test"
+    DB_PASS: str = "<PASSWORD>"
 
     class Config:
         env_file = ".env"

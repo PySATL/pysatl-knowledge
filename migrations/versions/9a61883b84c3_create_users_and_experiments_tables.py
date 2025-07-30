@@ -1,14 +1,14 @@
 """Create users and experiments tables
 
 Revision ID: 9a61883b84c3
-Revises: 
+Revises:
 Create Date: 2025-07-28 20:58:42.261092
 
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 
 # revision identifiers, used by Alembic.

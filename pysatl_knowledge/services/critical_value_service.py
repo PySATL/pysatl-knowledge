@@ -1,64 +1,78 @@
 from typing import Optional
 
-from pysatl_knowledge.schemas.critical_value import CriticalValueCreate, CriticalValueResponse
+from fastapi import HTTPException
+
+from pysatl_knowledge.models.critical_value_model import CriticalValueModel
+from pysatl_knowledge.repositories import CriticalValueRepository
+from pysatl_knowledge.schemas.critical_value_schema import (
+    CriticalValueCreate,
+    CriticalValueResponse,
+)
 
 
 class CriticalValuesService:
     def __init__(self):
-        # В будущем: сюда можно передать session или репозиторий
-        pass
+        self.repository = CriticalValueRepository()
 
     async def get_cv_by_params(
         self,
-        code: str,
-        size: int,
-        sl: float,
-    ) -> CriticalValueResponse:
-        # TODO
+        criterion_code: Optional[str] = None,
+        sample_size: Optional[int] = None,
+        iterations: Optional[int] = None,
+        status: Optional[str] = None,
+    ) -> list[CriticalValueResponse]:
+        critical_values = await self.repository.find_by_params(
+            criterion_code=criterion_code,
+            sample_size=sample_size,
+            iterations=iterations,
+            status=status,
+        )
+        if not critical_values:
+            raise HTTPException(status_code=404, detail="No critical values found")
 
-        return CriticalValueResponse(
-            id=1,
-            code=code,
-            size=size,
-            sl=sl,
-            lower_value=-1.96,
-            upper_value=1.96,
-            status="created",
-            created_by=1,
+        return list(
+            map(
+                lambda cv: CriticalValueResponse(
+                    id=cv.id,
+                    criterion_code=cv.criterion_code,
+                    sample_size=cv.sample_size,
+                    iterations=cv.iterations,
+                    result=cv.result,
+                    status=cv.status,
+                ),
+                critical_values,
+            )
         )
 
-    async def create_cv(self, data: CriticalValueCreate, created_by: int) -> CriticalValueResponse:
-        """
-        Создает новый эксперимент (заглушка)
-        """
-
-        # TODO
-        return CriticalValueResponse(
-            id=1,
-            code=data.code,
-            size=data.size,
-            sl=data.sl,
-            lower_value=data.lower_value,
-            upper_value=data.upper_value,
+    async def create_cv(self, data: CriticalValueCreate) -> CriticalValueResponse:
+        exp = CriticalValueModel(
+            criterion_code=data.criterion_code,
+            sample_size=data.sample_size,
+            iterations=data.iterations,
+            result=data.result,
             status="created",
-            created_by=created_by,
+        )
+        exp = await self.repository.create(exp)
+        return CriticalValueResponse(
+            id=exp.id,
+            criterion_code=exp.criterion_code,
+            sample_size=exp.sample_size,
+            iterations=exp.iterations,
+            result=exp.result,
+            status=exp.status,
         )
 
     async def verify_cv(self, experiment_id: int, status: str) -> Optional[CriticalValueResponse]:
-        """
-        Верифицирует или отклоняет эксперимент (заглушка)
-        """
-
-        # TODO
-        if experiment_id != 42:
+        exp = await self.repository.find_by_id(experiment_id)
+        if not exp:
             return None
+
+        exp = await self.repository.update_status(exp, status)
         return CriticalValueResponse(
-            id=1,
-            code="code",
-            size=42,
-            sl=0.1,
-            lower_value=-1.96,
-            upper_value=1.96,
-            status=status,
-            created_by=1,
+            id=exp.id,
+            criterion_code=exp.criterion_code,
+            sample_size=exp.sample_size,
+            iterations=exp.iterations,
+            result=exp.result,
+            status=exp.status,
         )
