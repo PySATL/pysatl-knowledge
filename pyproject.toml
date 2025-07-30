@@ -75,7 +75,7 @@ extend-select = [
   "C90", "B", "F", "E", "W", "UP", "I", "A", "TID", "YTT", "S", "PTH", "ASYNC", "NPY"
 ]
 extend-ignore = [
-  "E241", "E272", "E221", "B007", "B904", "S603", "S607", "S608", "NPY002"
+  "E241", "E272", "E221", "B007", "B904", "S603", "S607", "S608", "NPY002", "UP007"
 ]
 
 [tool.mypy]

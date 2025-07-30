@@ -6,6 +6,7 @@ repos:
     hooks:
       - id: flake8
         additional_dependencies: [Flake8-pyproject]
+        exclude: migrations
         # stages: [push]
 
   - repo: https://github.com/pre-commit/mirrors-mypy

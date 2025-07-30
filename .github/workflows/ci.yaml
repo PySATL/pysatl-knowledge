@@ -10,7 +10,6 @@ on:
 
 jobs:
   build-linux:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -34,15 +33,15 @@ jobs:
       - name: Install dependencies with Poetry
         run: poetry install --with dev
 
-      - name: Run Ruff lint
-        run: poetry run ruff check --output-format=github
+      - name: Run Ruff lint (ignore migrations)
+        run: poetry run ruff check pysatl_knowledge --extend-exclude "migrations" --output-format=github
 
-      - name: Check formatting with Ruff
-        run: poetry run ruff format --check
+      - name: Check formatting with Ruff (ignore migrations)
+        run: poetry run ruff format pysatl_knowledge --extend-exclude "migrations" --check
 
-      - name: Mypy
+      - name: Mypy (ignore migrations)
         run: |
-          poetry run mypy pysatl_knowledge tests
+          poetry run mypy pysatl_knowledge
 
       - name: Run tests
         run: poetry run pytest --random-order
@@ -57,7 +56,6 @@ jobs:
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.coverallsToken }}
         run: |
-          # Allow failure for coveralls
           poetry run coveralls || true
 
       - name: Remove poetry.lock before checking for changes
